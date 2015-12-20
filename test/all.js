@@ -195,6 +195,35 @@ describe('fsm', function () {
 
     });
 
+    it('should should trigger in correct order', function () {
+
+      var order = [];
+      var push = function (num) {
+        return function () {
+          order.push(num);
+        };
+      };
+      var mc = getMachine1();
+
+      // go to yellow state
+      mc.warn();
+
+      mc.onbeforeclear(push(0));
+      mc.onexityellow(push(1));
+      mc.onentergreen(push(2));
+      mc.ongreen(push(3));
+      mc.onclear(push(4));
+      mc.onafterclear(push(5));
+
+      // trigger all streams above
+      mc.clear();
+
+      order.should.deepEqual([0,1,2,3,4,5]);
+
+
+    });
+
+
   });
 
   describe('placeholder', function () {

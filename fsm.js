@@ -12,6 +12,9 @@
 })('fsm', this, function() {
   'use strict';
   var Event = function Source(broadcaster) {
+    if (typeof broadcaster !== 'function') {
+      throw Error('Argument@pos0, `broadcaster`, must be a function.');
+    }
     // @see https://github.com/Raynos/geval/
     function Event() {
       var listeners = [];
@@ -22,6 +25,9 @@
         }
       }
       function event(listener) {
+        if (typeof listener !== 'function') {
+          throw Error('Argument@pos0, `listener`, must be a function.');
+        }
         listeners.push(listener);
         return removeListener;
         function removeListener() {
@@ -138,9 +144,17 @@
       event.data = data;
       // note order of arguments
       eventStreams[onbefore + transitionName](event);
+      eventStreams[onexit + event.fromState](event);
       currentState = toState;
-      eventStreams[ON + toState](event);
+      eventStreams[onenter + toState](event);
       eventStreams[onafter + transitionName](event);
+    };
+
+    var changeStateAsync = function (event, data) {
+      if (typeof Promise === 'undefined') {
+        throw Error('there is no `Promise implementation`.');
+      }
+      // TODO: add async impl.
     };
 
     // Add a stream to the state machine
