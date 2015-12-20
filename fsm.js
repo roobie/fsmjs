@@ -53,6 +53,15 @@
 
   // constants
   var ON = 'on';
+  var BEFORE = 'before';
+  var AFTER = 'after';
+  var ENTER = 'enter';
+  var EXIT = 'exit';
+  var onbefore = ON + BEFORE,
+      onexit = ON + EXIT,
+      onenter = ON + ENTER,
+      onafter = ON + AFTER;
+
   var WILDCARD = '*';
 
   return function fsm(cfg) {
@@ -128,9 +137,10 @@
           toState = event.toState;
       event.data = data;
       // note order of arguments
-      eventStreams[ON + transitionName](event);
+      eventStreams[onbefore + transitionName](event);
       currentState = toState;
       eventStreams[ON + toState](event);
+      eventStreams[onafter + transitionName](event);
     };
 
     // Add a stream to the state machine
@@ -138,10 +148,35 @@
     // then a property called onalert will be created
     // on the stateMachine, and it will have the interface
     // of a geval Event.
-    var addStream = function (name) {
-      stateMachine[ON + name] = Event(function (broadcast) {
-        eventStreams[ON + name] = broadcast;
-      });
+    var addStream = function (name, stateOrTransition) {
+      var thunk = {
+        state: function () {
+          var enter = onenter + name,
+              exit = onexit + name;
+
+          stateMachine[ON + name] = stateMachine[enter] = Event(function (broadcast) {
+            eventStreams[enter] = broadcast;
+            eventStreams[ON + name] = broadcast;
+          });
+          stateMachine[exit] = Event(function (broadcast) {
+            eventStreams[exit] = broadcast;
+          });
+        },
+        transition: function () {
+          var before = onbefore + name,
+              after = onafter + name;
+
+          stateMachine[before] = Event(function (broadcast) {
+            eventStreams[before] = broadcast;
+          });
+          stateMachine[ON + name] = stateMachine[after] = Event(function (broadcast) {
+            eventStreams[after] = broadcast;
+            eventStreams[ON + name] = broadcast;
+          });
+        }
+      }[stateOrTransition];
+
+      return thunk();
     };
 
     // The below code rigs and wires the state machine internals.
@@ -178,11 +213,11 @@
         ].join(' '));
       };
 
-      addStream(transitionName);
+      addStream(transitionName, 'transition');
       from.forEach(function (fromState) {
-        addStream(fromState);
+        addStream(fromState, 'state');
       });
-      addStream(to);
+      addStream(to, 'state');
     });
 
     return stateMachine;
