@@ -99,6 +99,12 @@ describe('fsm', function () {
       m.state().should.equal('red');
     });
 
+    it('should allow to transition into the same state if allowed per `from`', function () {
+      var m = getMachine1();
+      m.clear();
+      m.clear();
+    });
+
     it('should trigger events correctly', function () {
       var m = getMachine1();
       var c = 0;
@@ -127,6 +133,19 @@ describe('fsm', function () {
 
       m.alert();
       c.should.equal(2);
+    });
+
+    it('should be able to pass data from the transition function call to the event handler', function () {
+      var m = getMachine1();
+      var c = 0;
+      m.onclear(function (data) {
+        c += data;
+      });
+
+      m.clear(1);
+      m.clear(2);
+
+      c.should.equal(3);
     });
 
     it('should trigger events for states enterings correctly', function () {
