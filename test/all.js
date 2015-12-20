@@ -90,7 +90,6 @@ describe('fsm', function () {
       });
     });
 
-
     it('should transition correctly', function () {
       var m = getMachine1();
       m.warn();
@@ -138,14 +137,27 @@ describe('fsm', function () {
     it('should be able to pass data from the transition function call to the event handler', function () {
       var m = getMachine1();
       var c = 0;
-      m.onclear(function (data) {
-        c += data;
+      m.onclear(function (event) {
+        c += event.data;
       });
 
       m.clear(1);
       m.clear(2);
 
       c.should.equal(3);
+    });
+
+    it('stream callbacks should receive state machine metadata', function (done) {
+      var m = getMachine1();
+      var c = 0;
+      m.onclear(function (event) {
+        event.transitionName.should.equal('clear');
+        event.fromState.should.equal('green');
+        event.toState.should.equal('green');
+        done();
+      });
+
+      m.clear();
     });
 
     it('should trigger events for states enterings correctly', function () {

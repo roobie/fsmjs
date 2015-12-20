@@ -126,10 +126,11 @@
     var changeState = function(event, data) {
       var transitionName = event.transitionName,
           toState = event.toState;
+      event.data = data;
       // note order of arguments
-      eventStreams[ON + transitionName].call(null, data, event);
+      eventStreams[ON + transitionName](event);
       currentState = toState;
-      eventStreams[ON + toState].call(null, data, event);
+      eventStreams[ON + toState](event);
     };
 
     // Add a stream to the state machine
