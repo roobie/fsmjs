@@ -71,11 +71,24 @@
       return !stateMachine.can(transitionName);
     };
 
+    // { onNAME => stream }
     var eventStreams = {};
+
+    // { String => String }
     var mapTransitionTo = {};
+    // { String => Array<String> }
     var mapTransitionFrom = {};
 
     var ON = 'on';
+
+    /**
+     event => {
+       transitionName:String,
+       fromState:String,
+       toState:String
+     },
+     data => Any
+     */
     var changeState = function(event, data) {
       var transitionName = event.transitionName,
           toState = event.toState;
@@ -85,13 +98,27 @@
       eventStreams[ON + toState].call(null, data, event);
     };
 
+    // Add a stream to the state machine
+    // e.g. if name is 'alert':
+    // then a property called onalert will be created
+    // on the stateMachine, and it will have the interface
+    // of a geval Event.
     var addStream = function (name) {
       stateMachine[ON + name] = Event(function (broadcast) {
         eventStreams[ON + name] = broadcast;
       });
     };
+
+    // The below code rigs and wires the state machine internals.
     var transitions = cfg.transitions;
     Object.keys(cfg.transitions).forEach(function (transitionName) {
+      // for each of the transitions, we are going to:
+      // 1. add the transition as a function bound to a property
+      //    on the state machine. The property name will be the same
+      //    as the transition name
+      // 2. add streams for both transitions being executed and
+      //    states being entered as properties on the state machine
+      //    object.
       var transition = transitions[transitionName],
           from = transition.from,
           to = transition.to;
