@@ -1,4 +1,15 @@
-;var fsm = (function () {
+(function (name, root, factory) {
+  /* istanbul ignore next */
+  if(typeof define === 'function' && define.amd) {
+    define([name], factory);
+    /* istanbul ignore next */
+  } else if(typeof module === 'object' && module.exports) {
+    module.exports = factory();
+    /* istanbul ignore next */
+  } else {
+    root[name] = factory();
+  }
+})('fsm', this, function() {
   'use strict';
   var Event = function Source(broadcaster) {
     // @see https://github.com/Raynos/geval/
@@ -30,7 +41,19 @@
     return list.indexOf(item) !== -1;
   };
 
-  var slice = Function.prototype.call.bind(Array.prototype.slice);
+  var validate = function (cfg) {
+    if (!cfg.initialState) {
+      throw Error('Config must define the property `initialState`');
+    }
+
+    if (!cfg.transitions) {
+      throw Error('Config must define the property `transitions`');
+    }
+  };
+
+  // constants
+  var ON = 'on';
+  var WILDCARD = '*';
 
   return function fsm(cfg) {
     /**
@@ -44,7 +67,9 @@
      }
      ```
      */
+    validate(cfg);
     function FiniteStateMachine() {};
+    /**
     FiniteStateMachine.prototype = {
       constructor: FiniteStateMachine,
       state: function () {},
@@ -53,9 +78,10 @@
       is: function (stateName) {},
       allowedTransitions: function () {}
     };
+    */
 
     var stateMachine = new FiniteStateMachine();
-    var currentState = cfg.initial || '';
+    var currentState = cfg.initialState;
     stateMachine.state = function fsmState() {
       return currentState;
     };
@@ -63,12 +89,21 @@
       return stateMachine.state() === state;
     };
 
-    stateMachine.can = function fsmCan(transitionName) {
+    var can = function _can(state, transitionName) {
       var allowedStates = mapTransitionFrom[transitionName];
-      return contains(allowedStates, currentState);
+      return contains(allowedStates, state) ||
+        contains(allowedStates, WILDCARD);
+    };
+    stateMachine.can = function fsmCan(transitionName) {
+      return can(currentState, transitionName);
     };
     stateMachine.cannot = function fsmCan(transitionName) {
       return !stateMachine.can(transitionName);
+    };
+    stateMachine.allowedTransitions = function fsmAllowedTransitions() {
+      return Object.keys(mapTransitionFrom).filter(function (transitionName) {
+        return can(currentState, transitionName);
+      });
     };
 
     // { onNAME => stream }
@@ -79,7 +114,6 @@
     // { String => Array<String> }
     var mapTransitionFrom = {};
 
-    var ON = 'on';
 
     /**
      event => {
@@ -153,4 +187,5 @@
     return stateMachine;
   };
 
-})();
+});
+

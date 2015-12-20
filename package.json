@@ -4,7 +4,10 @@
   "description": "",
   "main": "fsm.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "bdd": "mocha -w",
+
+    "cov": "istanbul cover node_modules/mocha/bin/_mocha -- --ui bdd -R spec -t 5000"
   },
   "repository": {
     "type": "git",
@@ -15,5 +18,10 @@
   "bugs": {
     "url": "https://github.com/roobie/fsmjs/issues"
   },
-  "homepage": "https://github.com/roobie/fsmjs#readme"
+  "homepage": "https://github.com/roobie/fsmjs#readme",
+  "devDependencies": {
+    "istanbul": "^0.4.1",
+    "mocha": "^2.3.4",
+    "should": "^8.0.2"
+  }
 }
