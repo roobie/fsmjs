@@ -95,6 +95,28 @@
     };
     */
 
+    var prototype = cfg.methods || {};
+    var defaultProtoProps = {
+      constructor: {
+        value: FiniteStateMachine
+      },
+      toString: {
+        value: function () {
+          return [
+            '[object ',
+            this.constructor.name,
+            ']@',
+            this.state()
+          ].join('');
+        }
+      }
+    };
+
+    FiniteStateMachine.prototype = Object.create(
+      prototype,
+      Object.assign(defaultProtoProps, cfg.extensions || {})
+    );
+
     var stateMachine = new FiniteStateMachine();
     var currentState = cfg.initialState;
     stateMachine.state = function fsmState() {
@@ -148,13 +170,6 @@
       currentState = toState;
       eventStreams[onenter + toState](event);
       eventStreams[onafter + transitionName](event);
-    };
-
-    var changeStateAsync = function (event, data) {
-      if (typeof Promise === 'undefined') {
-        throw Error('there is no `Promise implementation`.');
-      }
-      // TODO: add async impl.
     };
 
     // Add a stream to the state machine
