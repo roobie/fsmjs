@@ -224,6 +224,40 @@ describe('fsm', function () {
     });
 
 
+    describe('catch all events', function () {
+      var get = function () {
+        return fsm({
+          initialState: 'a',
+          transitions: {
+            foo: { from: 'a', to: 'b' },
+            bar: { from: 'b', to: 'a' },
+          }
+        });
+      };
+
+      it('should do in correct order', function () {
+        var c = 0;
+        var inc = function (expected) {
+          expected.should.equal(c);
+          c += 1;
+        };
+
+        c.should.equal(4);
+
+
+      });
+
+      it('should have catch all streams', function (done) {
+        var m = get();
+        m['on*'](function(event) {
+          event.should.be.ok();
+          done();
+        });
+        m.foo();
+      });
+    });
+
+
   });
 
   describe('placeholder', function () {

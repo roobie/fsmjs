@@ -144,10 +144,15 @@
       event.data = data;
       // note order of arguments
       eventStreams[onbefore + transitionName](event);
+      eventStreams[onbefore + WILDCARD](event);
       eventStreams[onexit + event.fromState](event);
+      eventStreams[onexit + WILDCARD](event);
       currentState = toState;
       eventStreams[onenter + toState](event);
+      eventStreams[onenter + WILDCARD](event);
       eventStreams[onafter + transitionName](event);
+      eventStreams[onafter + WILDCARD](event);
+
     };
 
     var changeStateAsync = function (event, data) {
@@ -233,6 +238,30 @@
       });
       addStream(to, 'state');
     });
+
+    (function populateWildcardStreams(name) {
+      var enter = onenter + name,
+          exit = onexit + name,
+          before = onbefore + name,
+          after = onafter + name;
+
+      stateMachine[enter] = Event(function (broadcast) {
+        eventStreams[enter] = broadcast;
+        eventStreams[ON + name] = broadcast;
+      });
+      stateMachine[exit] = Event(function (broadcast) {
+        eventStreams[exit] = broadcast;
+      });
+      stateMachine[before] = Event(function (broadcast) {
+        eventStreams[before] = broadcast;
+      });
+      // machine['on*']
+      stateMachine[ON + name] = stateMachine[after] = Event(function (broadcast) {
+        eventStreams[after] = broadcast;
+        eventStreams[ON + name] = broadcast;
+      });
+
+    })(WILDCARD);
 
     return stateMachine;
   };
