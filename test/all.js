@@ -117,6 +117,47 @@ describe('fsm', function () {
       m.alert();
       c.should.equal(4);
     });
+
+    it('should allow to add methods to the instance', function () {
+      var states = {
+        down: 'down',
+        up: 'up'
+      };
+
+      var machine = fsm({
+        initialState: states.down,
+        transitions: {
+          start: { from: states.down
+                   , to: states.up
+                 },
+
+          stop: { from: states.up
+                  , to: states.down
+                }
+        },
+        methods: {
+          connected:  function () {
+            return this.is('up');
+          },
+          disconnected: function () {
+            return this.is('down');
+          }
+        },
+        extensions: {
+          constructor: {
+            value: function ConnFsm() {}
+          }
+        }
+      });
+
+      machine.connected.should.be.a.Function();
+
+      machine.connected().should.be.False();
+
+      machine.constructor.name.should.equal('ConnFsm');
+
+      machine.toString().should.equal('[object ConnFsm]@down');
+    });
   });
 
 
