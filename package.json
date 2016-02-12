@@ -1,13 +1,16 @@
 {
-  "name": "fsmjs",
-  "version": "1.0.0",
+  "name": "streamfsm",
+  "version": "0.0.4",
   "description": "",
   "main": "fsm.js",
   "scripts": {
     "test": "mocha",
     "bdd": "mocha -w",
 
-    "cov": "istanbul cover node_modules/mocha/bin/_mocha -- --ui bdd -R spec -t 5000"
+    "cov": "istanbul cover node_modules/mocha/bin/_mocha -- --ui bdd -R spec -t 5000",
+
+    "prepubl": "npm test && pakmanager -e node deps",
+    "publ": "npm publish ./"
   },
   "repository": {
     "type": "git",

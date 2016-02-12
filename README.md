@@ -1,6 +1,7 @@
 # fsmjs
 JavaScript Finite State Machine with streams
 
+inspired by https://github.com/jakesgordon/javascript-state-machine
 
 ```javascript
 var logger = function (arg) {

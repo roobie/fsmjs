@@ -276,18 +276,6 @@ describe('fsm', function () {
         });
       };
 
-      it('should do in correct order', function () {
-        var c = 0;
-        var inc = function (expected) {
-          expected.should.equal(c);
-          c += 1;
-        };
-
-        c.should.equal(4);
-
-
-      });
-
       it('should have catch all streams', function (done) {
         var m = get();
         m['on*'](function(event) {
@@ -297,8 +285,6 @@ describe('fsm', function () {
         m.foo();
       });
     });
-
-
   });
 
   describe('placeholder', function () {
